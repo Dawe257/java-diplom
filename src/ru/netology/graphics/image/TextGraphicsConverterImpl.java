@@ -29,12 +29,22 @@ public class TextGraphicsConverterImpl implements TextGraphicsConverter {
         Image scaledImage;
         BufferedImage bwImg;
         if (width > 0 || height > 0) {
-            // TODO
             int newWidth = img.getWidth();
             int newHeight = img.getHeight();
 
+            if (img.getWidth() > width) {
+                newWidth = width;
+                newHeight = (newWidth * img.getHeight()) / img.getWidth();
+            }
+
+            if (newHeight > height) {
+                newHeight = height;
+                newWidth = (newHeight * img.getWidth()) / img.getHeight();
+            }
+
             scaledImage = img.getScaledInstance(newWidth, newHeight, BufferedImage.SCALE_SMOOTH);
             bwImg = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_BYTE_GRAY);
+
         } else {
             scaledImage = img.getScaledInstance(img.getWidth(), img.getHeight(), BufferedImage.SCALE_SMOOTH);
             bwImg = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
@@ -44,15 +54,14 @@ public class TextGraphicsConverterImpl implements TextGraphicsConverter {
         WritableRaster bwRaster = bwImg.getRaster();
 
         StringBuilder result = new StringBuilder();
-        for (int h = 0; h < img.getHeight(); h++) {
-            for (int w = 0; w < img.getWidth(); w++) {
+        for (int h = 0; h < bwRaster.getHeight(); h++) {
+            for (int w = 0; w < bwRaster.getWidth(); w++) {
                 int color = bwRaster.getPixel(w, h, new int[3])[0];
                 char c = schema.convert(color);
                 result.append(c);
             }
             result.append('\n');
         }
-
         return result.toString();
     }
 
